@@ -1,0 +1,78 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+bool can_participant_apply(vector<string> participant, vector<int> role, vector<bool> mentors) {
+    for (int i = 1; i < role.size(); i++) {
+        int skill_level_required = role[i];
+        if (skill_level_required == 0) {
+            continue;
+        }
+        int skill_level_participant = stoi(participant[i]);
+        if (skill_level_participant >= skill_level_required) {
+            return true;
+        }
+        if (mentors[i] && skill_level_participant == skill_level_required - 1) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int count_completed_projects(vector<vector<string>> participants, vector<vector<string>> projects) {
+    int completed_projects = 0;
+    for (auto project : projects) {
+        vector<int> roles;
+        for (int i = 2; i < project.size(); i++) {
+            roles.push_back(stoi(project[i]));
+        }
+        vector<bool> mentors(6, false);
+        vector<bool> completed_roles(roles.size(), false);
+        for (auto participant : participants) {
+            for (int i = 0; i < roles.size(); i++) {
+                if (completed_roles[i]) {
+                    continue;
+                }
+                if (can_participant_apply(participant, roles, mentors)) {
+                    if (!mentors[i + 1]) {
+                        mentors[i + 1] = true;
+                    }
+                    completed_roles[i] = true;
+                }
+            }
+            if (all_of(completed_roles.begin(), completed_roles.end(), [](bool i){return i;})) {
+                completed_projects += 1;
+                break;
+            }
+        }
+    }
+    return completed_projects;
+}
+
+int main() {
+    int n;
+    cin >> n;
+    vector<vector<string>> participants(n);
+    for (int i = 0; i < n; i++) {
+        vector<string> participant_info(7);
+        for (int j = 0; j < 7; j++) {
+            cin >> participant_info[j];
+        }
+        participants[i] = participant_info;
+    }
+    int m;
+    cin >> m;
+    vector<vector<string>> projects(m);
+    for (int i = 0; i < m; i++) {
+        vector<string> project_info(8);
+        for (int j = 0; j < 8; j++) {
+            cin >> project_info[j];
+        }
+        projects[i] = project_info;
+    }
+    int completed_projects = count_completed_projects(participants, projects);
+    cout << completed_projects << endl;
+    return 0;
+}
